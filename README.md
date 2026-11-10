@@ -1,0 +1,272 @@
+# Samsung QN75Q60D voice controls
+
+Based on [Samshush](https://github.com/elithrar/samshush), with Q60D-specific
+compatibility, recovery and boot-reapplication support. Upstream licenses and
+notices are retained. The default Frame profile remains available; Q60D commands
+require `--device-profile q60d`.
+
+Root your Samsung TV and disable unwanted voice, advertising and background
+services, with optional removal of selected apps and models. Service and app-disable
+controls are reversible; package removal has separate recovery limits.
+
+The default profile targets Frame Pro QN65LS03FWFXZA, build
+`T-RSMFAKUC-0090-REL-202607141953`. A separate, voice-only Q60D profile targets
+QN75Q60DBFXZA, build `T-NKLDAKUC-REL-202601050820` (Tizen 8, ARM32).
+Other models and builds require their own compatibility and recovery validation.
+
+For that exact Q60D, add `--device-profile q60d` before the command. It reuses
+the native app transactions and runtime masks, with reviewed app/unit hashes
+and separate recovery journals. Available commands are `inspect`, `voice-audit`,
+`apps apply/status/verify/restore`, `sound-sensor apply/status/verify/restore`,
+`guards-apply`, `apply --scope voice`, `status`, `restore`, and separately requested
+`startup audit/probe/install/status/run/remove`. The Q60D-only
+`apps ... --group voice-ui-refresh` group separately journals recovery of the
+two already-selected UI apps observed to change and become enabled again.
+The selection contains 23 voice apps, one separate ambient-sound app, 17 runtime
+units and five vendor startup guards. Native disable/launch-denial/restore and a
+runtime mask/status/restore probe passed on-device. The batch app flags, launch
+denials, markers and runtime masks also passed live readback; full batch restore
+and detailed retained-feature checks remain unverified. The owner reports
+normal TV operation. Check the current private reports for device state.
+Voice commands alone do not install a boot hook. The optional Q60D startup hook
+enrolls only its 17 voice units and verifies the existing app blocks/guards;
+it preserves the original startup script for exact removal. Install, removal,
+reinstall and installed-path run checks passed on the Q60D. The optimized
+worker also passed a full cold boot and ordinary status readbacks without
+host-side apply. Runtime masks last
+for the current boot unless the installed hook reapplies them. Native flags/guards
+survived the observed restart. That restart changed the reported firmware build;
+the old worker correctly refused it. New-policy automatic reapplication passed a
+later cold boot. Complete microphone capture denial is unverified.
+
+Use the discovered TV address in place of this example:
+
+```sh
+uv run --project tools tools/frame.py --device-profile q60d --tv 192.0.2.10 inspect
+```
+
+After assessment and an authorized application, recovery first uses `startup remove`
+when installed, then `apps restore --group voice-ui-refresh` if applied,
+`sound-sensor restore`, `apps restore`, then `restore`, each with the same global profile and
+connection options. These restore the recorded app flags, guards and runtime
+units; retain journals and reports if recovery fails.
+
+## How it works
+
+Samshush runs on your computer and connects to your TV over the local network.
+It uses Python tools and temporary helpers on the TV:
+
+- **Connect:** Samsung's Smart Development Bridge (SDB) provides the connection
+  on TCP port 26101. A command-injection flaw lets Samshush run shell commands.
+- **Get root:** Flaws in the TV's .NET runtime and Samsung's archive launcher
+  provide temporary root access. No firmware flashing is needed.
+- **Apply changes:** Samshush saves the original state, blocks selected apps and
+  services, and filters the certificate files. The helper sends results back over
+  an authenticated TCP connection, then exits. Restore commands undo service and
+  app-disable changes. Optional package removal uses the native uninstaller after
+  a verified backup to your computer.
+
+App blocks use persistent settings. An optional startup hook reapplies service
+masks and certificate changes in the background, without your computer. Remove it
+with `startup remove` before restoring those controls. Firmware updates can reset
+the changes or patch the root exploit, so check compatibility before updating.
+
+## Usage
+
+1. Connect your TV and computer to the same network. On the TV, open **Apps →
+   App Settings**, enter **12345**, enable **Developer Mode**, enter your computer’s
+   LAN IP address, and reboot. See [Samsung’s setup guide](https://developer.samsung.com/smarttv/develop/getting-started/using-sdk/tv-device.html)
+   if your menus differ.
+2. Clone the repository, then open it in your coding agent:
+
+   ```sh
+   git clone https://github.com/willfowler33/samsungqn75q60.git
+   cd samsungqn75q60
+   ```
+
+3. Copy this prompt into your coding agent:
+
+   ```text
+   Read AGENTS.md, then find and connect to my Samsung TV on the local network.
+   Use --device-profile q60d with this repo’s uv-driven Python tools. Verify the
+   exact model/build before applying the assessed voice controls. Preserve normal
+   TV functions and explain verification/recovery. Boot reapplication is a
+   separate explicit request; do not apply unrelated optional controls.
+   ```
+
+> This was developed using GPT-6 Astra. I expect other frontier models to be
+> successful given the prompt and tools in this repo. But your mileage may vary
+> if you’re using smaller/quantized or previous-generation models.
+
+Your agent handles dependencies, compatibility checks and recovery using
+[AGENTS.md](AGENTS.md). Device commands use temporary root access, including audits.
+
+## Findings & Services
+
+These recommendations assume you use HDMI devices and streaming apps, and don’t
+need voice assistants or sound monitoring. “Disabled” and “kept enabled” describe
+the tested Frame Pro configuration; manual recommendations are identified separately.
+Optional controls still require the owner’s approval on other installations.
+
+| Service or feature | Control or recommendation | What we found and why |
+| --- | --- | --- |
+| Bixby, Alexa and voice recognition | Selected apps disabled | Native app blocks prevent selected assistants, speech recognition and wake-word apps from launching. Verification also checks for surviving built-in .NET apps that use a shared launcher. |
+| Always-on voice and far-field listening | Selected services disabled | Dedicated services support voice activation, including standby paths. Disabling the visible assistant alone does not cover them. |
+| Virtual microphones, Bluetooth HFP and soundbar voice passthrough | Selected services disabled | These add microphone inputs beyond the TV’s built-in mic. Blocking them can remove hands-free features. Keep normal Bluetooth and audio output services. |
+| SmartThings and SmartThings Find | Selected integrations disabled | Samshush blocks the selected client, plugin, hub and Find apps and the IoT hub startup paths. The shared sensor service stays enabled for light sync. |
+| SmartThings Sound Sensor / Pet Care | Sound sensing settings off | SmartThings can trigger events from sound, including in standby. The shared sensor service also handles light sync, so keep it enabled. |
+| Ambient sound and ultrasonic Art presence | Disabled | `ambient-sound` uses the microphone for sound and presence detection. Blocking it removes automatic presence detection. Manual Art Mode still works. |
+| Wi-Fi motion and presence sensing | Selected services disabled | Blocks the LAN-presence, Wi-Fi motion, user-presence and awareness services. Automatic presence-based dimming, power saving and Art wake may be lost; normal networking remains enabled. |
+| Viewing Information Services | Manual opt-out recommended | Viewing-data consent is separate from voice settings. Turn it off in the TV’s privacy settings. |
+| Content analysis and iACR | Kept enabled | Content analysis handles logo recognition and HDMI auto-detection. iACR provides playback controls. Disabling these can break useful input features. |
+| Screen-based game/app recognition | Disabled | The detector requests 960×540 frames at a configured 2.5-second interval, then feeds a 64×64 image into an INT8 model. Samshush blocks the recognition launcher and UI-image detector. |
+| Recognition models and AI interpreter | Selected packages removed | The non-branded screen-analysis model manager can reinstall a missing model before boot-time shutdown. Keep the runtime blocks and recheck after restart; removal alone is not a persistent barrier. |
+| Samsung Analytics app | Removed; service updater blocked | The standalone app and its storage are absent. Its separate service updater is disabled to block that reinstall path; other apps may still collect analytics. |
+| Samsung service updater | Disabled | Blocks its Analytics reinstall path and automatic Samsung Account, Knox and other Samsung service updates. Existing services and manual firmware updates remain enabled. |
+| Visual analysis and subtitle recognition | Selected services disabled | The screen-analysis and cognition managers sit outside the existing game/app recognition block. Disabling them removes food/text discovery and subtitle recognition; ordinary subtitles and accessibility need separate checks. |
+| Advertising and usage analytics | Selected components disabled | Samshush blocks Adagent, targeted-ad, CoBA ads and the selected analytics and diagnostic-reporting services. Other apps may still send telemetry. |
+| TV Plus, Gaming Hub and Samsung Health | Selected apps disabled | Samshush blocks the selected apps and Health startup paths. Shared TV Plus broadcast and channel services stay enabled. |
+| PISA shared framework | Kept enabled | PISA schedules account-consent and customization services as well as ads. Block its separate adagent app to preserve those other functions. |
+| Remote support and shop management | Selected services disabled | Remote Management, Easy Support and Shop Care services are blocked. The separate Maintenance Mode backup/restore services and owner maintenance access are preserved. |
+| Remote PC | App and service disabled | The Remote PC launcher and manager are blocked. Its sandbox and shared browser remain intact. This is not a vulnerability finding. |
+| Gaming Hub backends | Selected apps and services disabled | Two backend apps and the daemon startup path are blocked separately from Gaming Hub’s frontend. HDMI Game Mode, Game Bar and controller support are outside this group. |
+| Alexa startup helper | Not registered on the tested TV | The extracted firmware includes a separate jump-starter app. Its optional control requires that exact app registration; it was not applied on this TV. |
+| Context-aware data collection | Selected service package removed; collector disabled | The main context-aware package is uninstalled and its data logger is stopped and masked. Other apps and context agents may still collect data. |
+| App and model delivery | Selected automatic delivery paths disabled | Blocks three app sync/update helpers and the background-update service. Shared package tools, appbinary-manager and manual firmware updates remain enabled; this does not prevent privileged firmware from reinstalling an app. |
+| HDMI-CEC / Anynet+ and ARC/eARC | Kept enabled | CEC handles device power and remote commands. ARC/eARC sends audio to the soundbar. |
+| eMudhra / emSign trust roots | Four selected roots removed | Samshush filters these roots from 11 certificate files and leaves other certificates intact. Embedded app trust stores and cached certificates are unaffected. |
+| Automatic firmware updates | Auto Update off; update manually | Check compatibility before installing firmware. An update can reset the changes or patch the root exploit. |
+| Home layout and startup | Optional native presets | An Apple TV-only row simplifies Samsung’s existing interface. The full-screen replacement below is separate; its Samsung Home fallback retains the original row. |
+| Full-screen shortcut Home | Optional replacement applied | Open Apple TV, HDMI ports, Settings and Art over a Monet background from the Home button. Back returns to Samsung Home; optional weather adds current conditions and today’s high/low. |
+| Art and the Spotlight screensaver | Optional quiet hours and automatic Art Mode | Choose when full-screen Art should put the Frame in standby. To replace Samsung’s idle Spotlight screensaver with artwork throughout the day, enable `--spotlight-art`. |
+| Settings, manual Art Mode, playback, browser, Netflix, networking, One Connect and DRM | Kept enabled | These provide the TV’s core functions. Preserve their shared runtimes and unrelated trust certificates. |
+
+Most app controls disable rather than uninstall. Six packages were uninstalled
+after an off-device backup; two later returned and were removed again using a
+fresh backup and separate receipt. On a subsequent boot the screen-analysis
+model package returned again despite the revised shutdown order. The owner confirmed
+Apple TV picture, soundbar volume, input selection and manual Art Mode still work
+after the original changes. Complete removal persistence and network wake remain
+unverified. This doesn’t cover every microphone input
+or telemetry source. See [AGENTS.md](AGENTS.md#prove-the-outcome) for test
+coverage and remaining gaps.
+
+The optional groups `visual-analysis`, `gaming-backend`, `remote-support`,
+`remote-pc`, `ai-models`, `analytics-context`, `presence-sensing` and
+`optional-delivery` have passed live apply checks on the supported TV. `voice-launchers`
+requires an app absent from that TV’s registry. Each group has its own recovery
+journal. `service-audit` reads current services, app registrations and process
+identities without launching apps or capturing media. For groups with native
+helper checks, apply rolls back if a helper survives the manager shutdown.
+
+## Home Screen (optional)
+
+Optionally replace the default SmartHub noise with a custom home screen
+
+- Create a [Samsung TV signing profile](https://developer.samsung.com/smarttv/develop/tools/additional-tools/vscode/creating-certificates.html) for your TV.
+- Build with `uv run --project tools tools/launchpad.py --sdk /path/to/tizen-studio --profile Samshush --output .local/launchpad-build`. Add `--weather-postcode "$TV_WEATHER_POSTCODE"` for Celsius weather and today's forecast; your location stays in private build files.
+- Use `frame.py launchpad install --widget .local/launchpad-build/Shortcuts.wgt`, then `launchpad launch`. Check Apple TV, Settings, Art Mode and Back before assigning Home.
+- Run `launchpad activate --widget .local/launchpad-build/Shortcuts.wgt` to assign the Home button. `launchpad restore` returns it to Samsung Home. See [AGENTS.md](AGENTS.md#home-screen-optional) for complete commands, updates and recovery.
+
+## Art quiet hours (optional)
+
+On the supported Frame Pro, set a daily window in the TV’s local time. This example puts the Frame in standby when it displays artwork between 10 PM and 7 AM.
+
+```sh
+uv run --project tools tools/frame.py --tv 192.0.2.10 --callback-host 192.0.2.20 quiet-hours set --start 22:00 --end 07:00
+```
+
+Apple TV can keep playing through 10 PM. If you finish watching and switch to Art during quiet hours, the TV goes into standby. At 7 AM, a sleeping TV stays asleep until you wake it. Use `quiet-hours status` to check the schedule, repeat `set` to change the hours, or use `quiet-hours remove` to turn it off.
+
+To open Art automatically whenever Samsung's Spotlight screensaver appears, add `--spotlight-art` to the `set` command. Outside quiet hours the artwork stays on screen. During quiet hours the worker waits for full-screen Art and then requests standby. Use `--no-spotlight-art` with the same hours to turn off the automatic switch. A new installation starts with automatic switching off. Later schedule edits retain your choice.
+
+With quiet hours installed, the custom Home screen shows **Sleep** and **Wake** below Art Mode. Press Down from Art Mode to select Sleep, then Down again for Wake. Left and Right change the selected time by one hour. The CLI and Home use the same schedule.
+
+## Optional package removal
+
+`packages prepare --backup-dir PATH` disables and stops six assessed packages,
+then copies their installed files, app data, registration evidence and SMACK labels
+to a private backup on your computer. If transfer fails, `packages backup` retries
+that transfer without repeating preparation. `packages remove --backup-dir PATH`
+requires a matching backup, unchanged files and the four new service groups blocked.
+It uses the native uninstaller; it does not force-delete firmware packages.
+`packages status` checks registration, files and surviving processes. The optional
+boot hook also checks the removal receipt after reapplying service controls.
+
+If an assessed package returns, `packages prepare-returned --backup-dir NEW_PATH`
+backs up only the returned packages in a separate attempt. Use that same directory
+with `packages backup` or `packages remove`. The original receipt and backup stay
+intact; status rejects incomplete attempts and checks all six packages again.
+
+The screen-analysis manager can request a missing model when networking starts.
+Boot reapplication now handles visual analysis and optional delivery first to
+shorten that window. It cannot guarantee that the manager never runs before the
+boot hook. The separate `samsung-service-updates` app group blocks Samsung's
+service updater and has the broader tradeoff described above; removal does not
+apply that group automatically.
+
+The backup is **not a guaranteed reinstallable signed package**, and there is no
+automatic package-restore command. Recovery may require original vendor packages.
+Keep the private backup outside Git. These controls operate within the TV’s OS;
+privileged firmware can undo them, and a firmware update or fresh reboot needs
+separate verification. See [the agent guide](AGENTS.md#package-removal) for the
+exact selection, required shutdown order and recovery records.
+
+## Development
+
+```sh
+uv run --project tools ruff check tools
+uv run --project tools ruff format --check tools
+uv run --project tools python -m unittest discover -s tools/tests -v
+node --test launcher/tests/*.test.cjs
+```
+
+[Detailed agent prompt](prompts/samsung-tv-privacy.md)
+
+## License
+
+[BSD 3-Clause](LICENSE) for original project code and documentation.
+See [NOTICE](NOTICE) for third-party code, device payloads and firmware.
+
+## Contributing
+
+I'm trying a new way of accepting contributions on this repository, because the
+variance in pull requests based on people's ability to prompt, review, and even
+the model they're using generates a dramatic review burden. Instead:
+
+**If you want to contribute to this, you should open an issue and concisely describe
+the problem you're running into, and the feature you want to add or bug you want
+to fix that solves it. If you've tested this out on a local copy, include the
+concise prompt that you used, including any file changes that resolved this.**
+
+In fact, I recommend simply copying this contributing section, or telling your
+agent to follow this contribution guide when opening an issue.
+
+**The goal here is that your problem, feature/bug, and prompt should be an input
+into my agent instead, so that I can more carefully curate what gets added here
+and ensure that documentation, AGENTS.md, and all tooling are moving in lockstep.**
+
+I simply can't guarantee that a pull request is going to do all these things,
+and it's often easier these days to address somebody's challenges from scratch,
+or from good inputs rather than trying to review their outputs and fix them.
+
+## Credits
+
+I started this in mid-October after seeing [this tweet](https://x.com/lucataco/status/2111846873216553433?s=46)
+from [@lucataco](https://x.com/lucataco). Getting my Frame TV to boot faster, stop
+suspending volume and lose the unnecessary apps sounded great.
+
+Then I came across [@log4j’s](https://x.com/log4j) thread on
+[the spyware, adware and extremely questionable findings](https://x.com/log4j/status/2113014142600953868?s=46)
+on their Samsung TV. That pushed me to see how far Astra could get rooting my TV
+over the network. It turns out: pretty far!
+
+Q60D boot checks keep service restoration independent of mutable app code.
+They verify native app registrations, flags and guards afterward. Automatic app
+updates can reset app blocks; the boot worker reports that drift and does not
+rewrite flags or disable update services. The first cold boot restored all 17
+service masks, but its verification timed out. Process/registration checks were
+subsequently optimized, and the revised worker passed a fresh cold boot.
+All 17 masks, 24 app blocks and five startup markers were verified without
+host-side apply. The mask readback completed about 70 seconds after boot;
+complete hardware, standby and early-boot capture denial remains unverified.

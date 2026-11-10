@@ -1,0 +1,104 @@
+{
+  "root_transport": {
+    "repository": "https://github.com/chris-ritsen/samsung-tv-root",
+    "commit": "4ad2c4d3b0d0e0da4b5b7ebe4a787e94596f416b",
+    "patch": "Samsung apphost runtime detection from 8da744bc190543abe063a63b0b515b1e270bc04d",
+    "license": "vendor/LICENSE"
+  },
+  "device_payloads": {
+    "compiler": ".NET SDK 6.0.428",
+    "sources": [
+      "payload_sources.py",
+      "launchpad_routing.py",
+      "quiet_hours_worker.py"
+    ],
+    "build": "uv run --project tools tools/build_payloads.py",
+    "checksums": "assets/SHA256SUMS.json"
+  },
+  "firmware": {
+    "model": "QN65LS03FWFXZA",
+    "archive": "firmware/T-RSMFAKUC-0090_TB-RSWF4AKUC-0090.zip",
+    "bytes": 2439527748,
+    "sha256": "5891b5ac67157403a2cfa4541845cb68f4ddb263860f41bc874e41fb748d1f42",
+    "support_url": "https://www.samsung.com/latin_en/support/model/QN65LS03FWFXZA/",
+    "download_url": "https://org.downloadcenter.samsung.com/downloadfile/ContentsFile.aspx?CDSite=UNI_LATIN_EN&OriginYN=N&ModelType=N&ModelName=QN65LS03FWF&CttFileID=10519224&CDCttType=FM&VPath=FM%2F202609%2F20260908145115921%2FT-RSMFAKUC-0090_TB-RSWF4AKUC-0090.zip"
+  },
+  "extractors": [
+    {
+      "name": "unixtract",
+      "repository": "https://github.com/theubusu/unixtract",
+      "commit": "144cf51e3e1b6e832119fde60f676a6def8266f7"
+    },
+    {
+      "name": "vdfs-unpack",
+      "repository": "https://github.com/gtors/vdfs-unpack",
+      "commit": "0bc1e65b74016fbd59d5d68f09ab7920044be1f9",
+      "patch": "assets/vdfs-unpack.patch"
+    }
+  ],
+  "vendor_python_sha256": {
+    "vendor/samsung_tv_root/__init__.py": "c01a308499f41c05553136a7a9e3d4c95117796a69f31ca449e792c742ba5912",
+    "vendor/samsung_tv_root/archive_root.py": "113b14ea5a92bf728828e2fa0f668afb1f0d21f49762f3c4af8c05e97de950ac",
+    "vendor/samsung_tv_root/resources.py": "70b66360ac7eba32d126d4d08f2a22ebee4847e8795cad0a8c4572c2a4e37af7",
+    "vendor/samsung_tv_root/root_agent.py": "ee959b0e3c315d819a2a0fe89f3a45b744cea7f0330482b8059a82893b2a9c87",
+    "vendor/samsung_tv_root/sdb.py": "587f6d3f54a36386d6205eeabcd750f74cfdd4edf086bcc1f07d915ba40b29e2"
+  },
+  "q60d_validation": {
+    "profile": "profiles/q60d.json",
+    "model": "QN75Q60DBFXZA",
+    "build": "T-NKLDAKUC-REL-202601050820",
+    "platform": "Tizen 8.0 / armv7l",
+    "access": "Existing pinned archive-root transport and shipped .NET 6 payloads; no fork boot modules installed.",
+    "evidence": "Private .local/reports/: authenticated UID/GID 0, unchanged system-file hashes, staged file cleanup, one-app native disable/launch denial/restore, one-unit runtime mask/status/restore.",
+    "policy_files": "App executable and vendor unit hashes collected from this installed build; not inferred from downloaded firmware.",
+    "reboot_verified": true,
+    "batch_readback": {
+      "voice_apps": 23,
+      "ambient_sound_apps": 1,
+      "startup_markers": 5,
+      "current_boot_unit_masks": 17,
+      "full_batch_restore_verified": false,
+      "retained_features_owner_confirmed": false
+    },
+    "startup": {
+      "method": "Shared AT-HUB installer, matched original script/unit hashes; Q60D voice journal only.",
+      "probe": "Native gawk system service, UID 0, System::Privileged.",
+      "installed": true,
+      "run_tested": true,
+      "exact_removal_verified": true,
+      "reinstalled_and_run_tested": true,
+      "fresh_boot_verified": true,
+      "cold_runtime_masks_observed": 17,
+      "cold_worker_exit": 143,
+      "verification_optimized": true,
+      "warm_worker_elapsed_seconds": 8.12,
+      "successful_cold_worker_seconds": 87.82,
+      "successful_cold_mask_readback_at_uptime_seconds": 69.55,
+      "successful_cold_completion_at_uptime_seconds": 116.43,
+      "host_apply_before_readback": false
+    },
+    "previous_build": "T-NKLDAKUC-REL-202502052157",
+    "new_build_compatibility": "44 reviewed app/unit/interpreter hashes and app paths unchanged; live dependency review, native disable/denial/restore and runtime one-unit mask/status/restore passed.",
+    "first_restart": "Changed boot ID and firmware build; old worker recorded rejection. 24 native app flags and five startup marker files persisted.",
+    "new_build_runtime_readback": {
+      "unit_masks": 17,
+      "native_voice_launch_denials": 23,
+      "ambient_sound_flag": true,
+      "startup_markers": 5,
+      "installed_hook_run_status": true,
+      "fresh_boot_pending": false
+    },
+    "voice_ui_updates": {
+      "two_files_changed": true,
+      "two_flags_reenabled": true,
+      "separate_group_reblocked_and_denied": true,
+      "original_journal_preserved": true,
+      "no_updater_disabled": true
+    }
+  },
+  "project_upstream": {
+    "repository": "https://github.com/elithrar/samshush",
+    "commit": "7d249f23c51f0c0bee786e2b45f3d09fbc7d933b",
+    "distribution": "Q60D-focused source snapshot; upstream licenses and notices retained."
+  }
+}

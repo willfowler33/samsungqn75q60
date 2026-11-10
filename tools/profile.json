@@ -1,0 +1,585 @@
+{
+  "model": "QN65LS03FWFXZA",
+  "build": "T-RSMFAKUC-0090-REL-202607141953",
+  "firmware": "1301.0",
+  "root_route": "archive-root",
+  "upstream_commit": "4ad2c4d3b0d0e0da4b5b7ebe4a787e94596f416b",
+  "runtime_validated": true,
+  "persistence": "Native app flags, startup guards and Auto Update Off survived a physical power cycle. The installed asynchronous startup hook reapplied all selected runtime masks and certificate overlays before host-side apply. Owner confirmed manual Art Mode, picture and volume. Firmware-update survival is not guaranteed.",
+  "certificates": [
+    {
+      "path": "/opt/var/lib/ca-certificates/ca-bundle.pem",
+      "before": "ce91ef2fe7c87f130af0040de066adbbc32a6289b3833e470af843723151b6e6",
+      "after": "9f311d3c0417f83585311521f700d0853f424e1589f56a91285b730f48e961fb",
+      "file": "cert-00.pem"
+    },
+    {
+      "path": "/usr/apps/com.samsung.tv.cobalt/content/app/cobalt/content/ssl/certs/14bc7599.0",
+      "before": "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-01.pem"
+    },
+    {
+      "path": "/usr/apps/com.samsung.tv.cobalt/content/app/cobalt/content/ssl/certs/2923b3f9.0",
+      "before": "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-02.pem"
+    },
+    {
+      "path": "/usr/apps/com.samsung.tv.cobalt/content/app/cobalt/content/ssl/certs/406c9bb1.0",
+      "before": "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-03.pem"
+    },
+    {
+      "path": "/usr/apps/com.samsung.tv.cobalt/content/app/cobalt/content/ssl/certs/4b718d9b.0",
+      "before": "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-04.pem"
+    },
+    {
+      "path": "/usr/share/ca-certificates/certs/14bc7599.0",
+      "before": "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-05.pem"
+    },
+    {
+      "path": "/usr/share/ca-certificates/certs/2923b3f9.0",
+      "before": "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-06.pem"
+    },
+    {
+      "path": "/usr/share/ca-certificates/certs/406c9bb1.0",
+      "before": "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-07.pem"
+    },
+    {
+      "path": "/usr/share/ca-certificates/certs/4b718d9b.0",
+      "before": "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81",
+      "after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file": "cert-08.pem"
+    },
+    {
+      "path": "/usr/share/cert/vdca.pem",
+      "before": "cee56df8dcd2ed82f75f9ce770c8213252d9fe05ed5677bc3a439557119ef36b",
+      "after": "7b17ee84f380b6c2a8c1c010a1bdd6c41a26a11ca0eb0b09f9d1496ed63dede7",
+      "file": "cert-09.pem"
+    },
+    {
+      "path": "/usr/share/qsp/ca-bundle.crt",
+      "before": "1d9195b76d2ea25c2b5ae9bee52d05075244d78fcd9c58ee0b6fac47d395a5eb",
+      "after": "04ebd63b6bb89c1b4ff9d60ca6f7b3303ebcf147363572e4fedbbfa3c69c06d2",
+      "file": "cert-10.pem"
+    }
+  ],
+  "fingerprints_removed": {
+    "40f6af0346a99aa1cd1d555a4e9cce62c7f9634603ee406615833dc8c8d00367": "emSign Root CA - G1",
+    "86a1ecba089c4a8d3bbe2734c612ba341d813e043cf9e8a862cd5c57a36bbe6b": "emSign ECC Root CA - G3",
+    "125609aa301da0a249b97a8239cb6a34216f44dcac9f3954b14292f2e8c8608f": "emSign Root CA - C1",
+    "bc4d809b15189d78db3e1d8cf4f9726a795da1643ca5f1358e1ddb0edc0d7eb3": "emSign ECC Root CA - C3"
+  },
+  "units": [
+    "adagent-service.service",
+    "media-analytics-service.service",
+    "org.tizen.tv.media.analytics.service.busname",
+    "issue_report_agent.service",
+    "devicetracker.service",
+    "abnormal_user_behavior.service",
+    "emergency-log-transmitter.service",
+    "slive-provider-daemon.service",
+    "slive-provider-daemon.path",
+    "com.samsung.FCCallListener.busname",
+    "bms.service",
+    "samsunghealth-service-tv-eventd.service",
+    "com.samsung.tv.aov-service.path",
+    "com.samsung.tv.aov-service.service",
+    "com.samsung.tv.farfieldvoice.path",
+    "com.samsung.tv.farfieldvoice.service",
+    "virtual-mic-service.path",
+    "virtual-mic-service.service",
+    "org.tizen.multi-assistant-service.path",
+    "org.tizen.multi-assistant-service.service",
+    "org.tizen.voice-client.path",
+    "org.tizen.voice-client.service",
+    "org.tizen.voice-app.path",
+    "org.tizen.voice-app.service",
+    "com.samsung.tv.ondevice-voice.path",
+    "com.samsung.tv.ondevice-voice.service",
+    "com.samsung.tv.wakeupless.path",
+    "com.samsung.tv.wakeupless.service",
+    "com.samsung.tv.bixby-prov.path",
+    "com.samsung.tv.bixby-prov.service",
+    "com.samsung.tv.voiceid-service.service",
+    "com.samsung.tv.voiceassistant-music.service",
+    "com.samsung.tv.hfpAgent.busname",
+    "hfp-agent.service",
+    "com.samsung.tv.passthru-service.path",
+    "com.samsung.tv.passthru-service.service"
+  ],
+  "application_ids_deferred": [
+    "com.samsung.tv.slive-daemon",
+    "org.tizen.bms-service",
+    "com.samsung.tv.pisa-service",
+    "org.tizen.pisa-control-service"
+  ],
+  "voice_privacy": {
+    "requirement": "Disable all microphone capture, including standby, TV far-field, remote and virtual inputs. Microphone shutdown takes priority over ultrasonic Art presence detection.",
+    "systemd_units": [
+      "com.samsung.tv.aov-service.path",
+      "com.samsung.tv.aov-service.service",
+      "com.samsung.tv.farfieldvoice.path",
+      "com.samsung.tv.farfieldvoice.service",
+      "virtual-mic-service.path",
+      "virtual-mic-service.service",
+      "org.tizen.multi-assistant-service.path",
+      "org.tizen.multi-assistant-service.service",
+      "org.tizen.voice-client.path",
+      "org.tizen.voice-client.service",
+      "org.tizen.voice-app.path",
+      "org.tizen.voice-app.service",
+      "com.samsung.tv.ondevice-voice.path",
+      "com.samsung.tv.ondevice-voice.service",
+      "com.samsung.tv.wakeupless.path",
+      "com.samsung.tv.wakeupless.service",
+      "com.samsung.tv.bixby-prov.path",
+      "com.samsung.tv.bixby-prov.service",
+      "com.samsung.tv.voiceid-service.service",
+      "com.samsung.tv.voiceassistant-music.service",
+      "com.samsung.tv.hfpAgent.busname",
+      "hfp-agent.service",
+      "com.samsung.tv.passthru-service.path",
+      "com.samsung.tv.passthru-service.service"
+    ],
+    "application_ids": [
+      "com.samsung.tv.aov-service",
+      "org.tizen.multi-assistant-service",
+      "org.tizen.voice-onboarding",
+      "com.samsung.tv.alexa-client",
+      "com.samsung.tv.alexa-fullscreen-app",
+      "com.samsung.tv.aov-dashboard",
+      "com.samsung.tv.bixby-context-client",
+      "com.samsung.tv.bixby-prov",
+      "com.samsung.tv.bixbycapsuleviewer",
+      "com.samsung.tv.farfieldvoice",
+      "com.samsung.tv.mybixby",
+      "com.samsung.tv.ondevice-voice",
+      "com.samsung.tv.voice-instant-app",
+      "com.samsung.tv.voiceassistant-music",
+      "com.samsung.tv.voiceid-service",
+      "com.samsung.tv.wakeup-engine-alexa",
+      "com.samsung.tv.wakeup-engine-bixby",
+      "com.samsung.tv.wakeupless",
+      "org.tizen.voice-app",
+      "org.tizen.voice-app-service",
+      "org.tizen.voice-client",
+      "org.tizen.stt-client",
+      "com.samsung.tv.passthru-service",
+      "com.samsung.tv.vif",
+      "AQKO41xyKP.AmazonAlexa"
+    ],
+    "complete_microphone_disable_implemented": false,
+    "required_physical_action": "Set the TV microphone switch to Off; separately establish a hardware-disabled or microphone-free remote.",
+    "remaining_gaps": [
+      "HFP and virtual-microphone masks are automatically reapplied after boot; early-boot and standby capture denial remain unverified.",
+      "Hardware switch, remote/USB/Bluetooth/browser capture, HAL/DSP and standby denial remain unverified.",
+      "Full 25-app restore cycle and retained-feature behavior are not fully live-tested.",
+      "SmartThings settings read back off and the ambient-sound block survived reboot; standby capture denial remains unverified."
+    ],
+    "external_microphone_findings": "Bluetooth HFP no-built-in-mic support confirmed in conditional code; soundbar Bixby passthrough UI/feature path confirmed. Unconditional capture or cloud upload regardless of Bixby is not established."
+  },
+  "limits": [
+    "Only QN65LS03FWFXZA build T-RSMFAKUC-0090-REL-202607141953 has live evidence.",
+    "Voice controls do not establish complete microphone capture denial.",
+    "Automatic runtime reapplication passed a physical power cycle. Runtime protection has an initial boot interval before its scopes finish; this does not establish complete capture denial.",
+    "Chromium embedded roots, cert-svc SQLite stores and private app TLS caches remain unchanged.",
+    "No firmware repack, signing or flashing. Automatic boot reapplication is an explicitly installed, reversible root hook.",
+    "Native Auto Update is Off; vendor override paths and firmware-update persistence are not guaranteed."
+  ],
+  "last_verified_utc": "2026-10-25T16:31:46Z",
+  "verified_voice_controls": {
+    "native_app_flags": 25,
+    "startup_guards": 8,
+    "runtime_units": 24,
+    "app_and_guard_reboot_persistence": true,
+    "full_capture_denial": false,
+    "app_and_guard_power_cycle_persistence": true
+  },
+  "verification_scope": "Post-power-cycle flags, guards, process absence, runtime masks, certificate overlays, Auto Update and startup timings verified. Direct app launch denial was tested before this reboot. Stored evidence is not a live status query.",
+  "sound_sensing": {
+    "application_ids": [
+      "com.samsung.tv.ambient-sound"
+    ],
+    "journal": "/opt/usr/home/owner/share/frame-sound-sensor-v1",
+    "last_verified_utc": "2026-10-25T16:31:46Z",
+    "disabled_and_launch_denied": true,
+    "reboot_verified": true,
+    "standby_capture_denial_verified": false,
+    "shared_sensor_mediator": "Preserved: tvsensor-iot-service supports light sync as well as sensor integration.",
+    "settings_readback": {
+      "db/tvsensor/EnabledSoundDetection": false,
+      "db/tvsensor/sensor_onoff": {
+        "light": "off",
+        "sound": "off",
+        "camera": "off"
+      }
+    },
+    "power_cycle_verified": true
+  },
+  "optional_controls": {
+    "advertising": {
+      "application_ids": [
+        "com.samsung.tv.adagent-service",
+        "com.samsung.tv.targeted-ad-service"
+      ],
+      "systemd_units": [
+        "adagent-service.service"
+      ]
+    },
+    "reporting": {
+      "application_ids": [],
+      "systemd_units": [
+        "org.tizen.tv.media.analytics.service.busname",
+        "media-analytics-service.service",
+        "devicetracker.service",
+        "abnormal_user_behavior.service",
+        "issue_report_agent.service",
+        "emergency-log-transmitter.service"
+      ]
+    },
+    "wifi-presence": {
+      "application_ids": [],
+      "systemd_units": [
+        "wifi-presence.path",
+        "wifi-presence.service"
+      ]
+    },
+    "gaming": {
+      "application_ids": [
+        "com.samsung.tv.gaminghub",
+        "com.samsung.tv.gamehome",
+        "com.samsung.tv.home.game"
+      ],
+      "systemd_units": []
+    },
+    "health": {
+      "application_ids": [
+        "com.samsung.tv.samsung-health",
+        "samsunghealth-service-tv"
+      ],
+      "systemd_units": [
+        "samsunghealth-service-tv.path",
+        "samsunghealth-service-tv-path-activation.path",
+        "samsunghealth-service-tv.service",
+        "samsunghealth-service-tv-eventd.service",
+        "samsunghealth-service-tv-path-activation.service"
+      ]
+    },
+    "tv-plus": {
+      "application_ids": [
+        "HEPsqFNie0.tvplusstandalone",
+        "com.samsung.tv.tvPlusDeeplinker"
+      ],
+      "systemd_units": []
+    },
+    "smartthings": {
+      "application_ids": [
+        "com.samsung.tizen.smartthings-client",
+        "com.samsung.tizen.smartthings-thing",
+        "com.samsung.tizen.smartthings-plugin",
+        "com.samsung.tizen.smartthings-plugin-platform",
+        "com.samsung.tv.iot-hub-control"
+      ],
+      "systemd_units": [
+        "com.samsung.tv.iot-hub-control.path",
+        "com.samsung.tv.iot-hub-control.service",
+        "com.samsung.tv.iot-hub-control.vconf.service"
+      ]
+    },
+    "smarthub-ads": {
+      "application_ids": [
+        "com.samsung.tv.coba.adagent"
+      ],
+      "systemd_units": []
+    },
+    "screen-recognition": {
+      "application_ids": [],
+      "systemd_units": [
+        "contents-ui-detector-service.service",
+        "contents-recognition-service.service"
+      ]
+    },
+    "smartthings-find": {
+      "application_ids": [
+        "com.samsung.tv.smartthingsfind-daemon",
+        "com.samsung.tv.smartthingsfind-ondemand"
+      ],
+      "systemd_units": []
+    },
+    "visual-analysis": {
+      "application_ids": [],
+      "systemd_units": [
+        "screen-analysis-service-manager.service",
+        "contents-cognition-service-manager.service"
+      ],
+      "process_paths": [
+        "/usr/bin/screen-analysis-service-manager",
+        "/usr/bin/contents-cognition-service-manager",
+        "/usr/bin/screen-analysis-discovery-service",
+        "/usr/bin/sa-ui-detector",
+        "/usr/bin/subtitle-recog-service"
+      ],
+      "purpose": "Stop the separate visual-analysis managers and verify their native helpers are absent.",
+      "tradeoffs": "Disables food/text discovery and subtitle recognition/accessibility functions. Normal subtitles, HDMI and manual Art require retained-feature checks. Does not prohibit other processes from reading model files.",
+      "validation": "Live apply, selected-process absence and automatic rollback/restart verified on the supported TV. Retained-feature and fresh reboot checks remain separate."
+    },
+    "gaming-backend": {
+      "application_ids": [
+        "com.samsung.tv.ghdaemon",
+        "com.samsung.tv.ghservice"
+      ],
+      "systemd_units": [
+        "com.samsung.tv.ghdaemon.path",
+        "com.samsung.tv.ghdaemon.service"
+      ],
+      "purpose": "Block Gaming Hub backend app registrations and startup paths separately from existing frontend blocks.",
+      "tradeoffs": "Gaming Hub services unavailable. Preserve Game Mode, Game Bar, HDMI ALLM/VRR and gamepad drivers.",
+      "validation": "Live apply, mask/flag readback and selected-process checks passed on the supported TV. Retained-feature and fresh reboot checks remain separate; full restore not exercised."
+    },
+    "remote-support": {
+      "application_ids": [],
+      "systemd_units": [
+        "remote-management.service",
+        "samsung-easy-support.service",
+        "remote-shop-care-hub.service"
+      ],
+      "process_paths": [
+        "/usr/bin/rmdemon",
+        "/usr/bin/ses-service",
+        "/usr/bin/rscmdemon"
+      ],
+      "purpose": "Stop optional remote-support and retail-management daemons, including their systemd-backed D-Bus activation.",
+      "tradeoffs": "Vendor remote support and remote shop management unavailable. Keep Maintenance Mode backup/restore, owner SDB and core remote navigation.",
+      "validation": "Live apply, mask readback and selected-process checks passed on the supported TV. Retained-feature and fresh reboot checks remain separate; full restore not exercised."
+    },
+    "remote-pc": {
+      "application_ids": [
+        "org.tizen.remotepc"
+      ],
+      "systemd_units": [
+        "org.tizen.remotepc.service"
+      ],
+      "purpose": "Block the Remote PC launcher and its separate service while retaining zone isolation and the shared browser.",
+      "tradeoffs": "Remote PC unavailable. This control is not a finding that this firmware is vulnerable.",
+      "validation": "Live apply, mask/flag readback and selected-process checks passed on the supported TV. Retained-feature and fresh reboot checks remain separate; full restore not exercised.",
+      "process_paths": [
+        "/opt/usr/apps/org.tizen.remotepc/bin/remotepc_manager"
+      ]
+    },
+    "voice-launchers": {
+      "application_ids": [
+        "com.samsung.tv.alexa-jump-starter"
+      ],
+      "systemd_units": [],
+      "purpose": "Block the separately registered Alexa startup app without changing the deployed voice journal.",
+      "tradeoffs": "Alexa startup unavailable. Does not establish complete microphone capture denial.",
+      "validation": "Present in extracted firmware but absent from the tested TV app registry; not applied. Verify registration before use."
+    },
+    "ai-models": {
+      "application_ids": [],
+      "systemd_units": [
+        "com.samsung.tv.ai-interpreter-service.path",
+        "com.samsung.tv.ai-interpreter-service.service"
+      ],
+      "purpose": "Stop the remaining AI interpreter and its path activation before separately removing the selected model packages.",
+      "tradeoffs": "AI interpretation and related translation features are unavailable. Package removal is a separate explicit command."
+    },
+    "analytics-context": {
+      "application_ids": [],
+      "systemd_units": [
+        "com.samsung.tv.context-aware-service.path",
+        "com.samsung.tv.context-aware-service.service",
+        "data-service.service"
+      ],
+      "process_paths": [
+        "/usr/bin/data-service"
+      ],
+      "purpose": "Stop the context-aware collector and data logger, independently of existing diagnostic reporting controls.",
+      "tradeoffs": "Context-based personalization is unavailable. Shared account consent and PISA remain enabled.",
+      "stop_grace_seconds": 20
+    },
+    "presence-sensing": {
+      "application_ids": [],
+      "systemd_units": [
+        "com.samsung.tv.wifi-motion-mgr.service",
+        "com.samsung.tv.wifi-motion-mgr-setcap.service",
+        "user-presence.service",
+        "ua-manager.service",
+        "ambient-ua-agent.service"
+      ],
+      "process_paths": [
+        "/usr/bin/wifi-motion-mgr",
+        "/usr/sbin/user-presence",
+        "/usr/bin/ua-manager",
+        "/usr/bin/ambient-ua-agent"
+      ],
+      "purpose": "Stop separate Wi-Fi motion and user-awareness services.",
+      "tradeoffs": "Presence-based automatic dimming, power saving and Art wake can be lost. Manual Art Mode and networking are retained."
+    },
+    "samsung-service-updates": {
+      "application_ids": [
+        "com.samsung.tizen.samsung-service-manager"
+      ],
+      "systemd_units": [],
+      "purpose": "Block the Samsung service updater that can reinstall the standalone Analytics package.",
+      "tradeoffs": "Stops automatic updates to Samsung Account, Knox and other Samsung service packages. Existing account services, the generic package manager and manual firmware updates remain enabled.",
+      "validation": "Live native flag, selected-process absence, and main/legacy app-manager launch denial verified on the supported TV. Fresh-boot persistence and retained-feature checks remain separate."
+    },
+    "optional-delivery": {
+      "application_ids": [
+        "org.tizen.was-appsync",
+        "org.tizen.was-appupdate",
+        "org.tizen.was-builtinupgrade"
+      ],
+      "systemd_units": [
+        "was-background-update.path",
+        "was-background-update.service"
+      ],
+      "process_paths": [
+        "/usr/bin/was_background_update"
+      ],
+      "purpose": "Disable optional app synchronization/update helpers and background delivery before package removal.",
+      "tradeoffs": "Automatic app updates and app synchronization are unavailable. Shared package management, appbinary-manager and the manual firmware updater remain enabled."
+    }
+  },
+  "verified_optional_controls": {
+    "date": "2026-10-25",
+    "native_app_flags": 17,
+    "launch_denials": 17,
+    "runtime_units": 19,
+    "certificate_overlays": 11,
+    "emsign_roots_removed": 4,
+    "reboot_verified": true,
+    "owner_observed": [
+      "Apple TV picture",
+      "sidebar and input selection",
+      "soundbar volume"
+    ],
+    "limitations": "Widgets, shared PISA/account-consent services, slive/BMS, embedded trust stores and remaining microphone routes are not covered.",
+    "reboot_check": "Native flag readback and process absence. Explicit launch-denial checks were performed before this reboot.",
+    "power_cycle_verified": true
+  },
+  "home": {
+    "journal": "/opt/usr/home/owner/share/frame-home-v1",
+    "settings": [
+      {
+        "name": "auto_start",
+        "key": "db/menu/smart_hub/ontvsetting/auto_start",
+        "type": "int",
+        "value": 0
+      },
+      {
+        "name": "app_booting",
+        "key": "db/menu/app_booting",
+        "type": "int",
+        "value": 0
+      },
+      {
+        "name": "autorun_tv_plus",
+        "key": "db/menu/autorun_tv_plus",
+        "type": "bool",
+        "value": 0
+      }
+    ],
+    "provider_hashes": {
+      "/usr/share/menu/providers/libsmarthub-data-provider.so": "79c08b012324b56e3245a9289166c2adaa7a0fddac74cc37e14b987203a1fbf6",
+      "/usr/share/menu/providers/libsystem-provider.so": "0960462781f515cf882398ef599f76b4b27ee30c1d3a53e7a772ce9b1eca2fb7"
+    },
+    "layout": {
+      "journal": "/opt/usr/home/owner/share/frame-home-layout-v1",
+      "component": "s/source.layer.hdmi@HDMI1/0",
+      "binary_hashes": {
+        "/opt/usr/apps/com.samsung.tv.home.media/bin/HomeMedia.dll": "9cae06a13d771f98aaaf4ce476b5d6ada12e99f9e4d035512bf49c600008699b",
+        "/usr/share/dotnet.tizen/tvappapi/Tizen.TV.Service.CoBA.Core.dll": "686716f173c501fae9c87fa9318c7ae7a0ebbcfdeabcdeaed00a1d3b5ad20561",
+        "/usr/share/dotnet.tizen/tvappapi/Tizen.TV.Service.CoBA.Common.dll": "9cce4e0c33fe7e6ee7c79031bb95b53c3e99cba6be67ca15088ef44ac9896705",
+        "/usr/bin/app_launcher": "5d6f641f564148eece10ea1e4c6da12c20f723db0892263afc138ecb144042c3"
+      }
+    }
+  },
+  "art_quiet_hours": {
+    "command": "quiet-hours set --start HH:MM --end HH:MM [--spotlight-art | --no-spotlight-art]",
+    "spotlight_art": "Off on new installations unless explicitly enabled. When enabled, open full-screen Art from the active Samsung Spotlight screensaver throughout the day and night; apply the standby window after full-screen Art is confirmed.",
+    "clock": "TV local time; start inclusive, end exclusive",
+    "service": "samshush-art-quiet-hours.service",
+    "journal": "/opt/usr/share/samshush-quiet-hours-v1",
+    "home_controls": "Sleep and Wake under Art Mode edit the installed CLI schedule in one-hour steps.",
+    "verification": "Verified Samsung Spotlight to full-screen Art outside quiet hours on this build. Prior device tests verified native HDMI input, Art-to-standby transitions, both Home selectors and CLI readback. Movie playback position and fresh-boot startup remain unverified."
+  },
+  "automatic_updates": {
+    "key": "db/menu/support/softwareupdate/autoupdate",
+    "value": 0,
+    "original_value": 1,
+    "journal": "/opt/usr/home/owner/share/frame-auto-update-v1",
+    "last_verified_utc": "2026-10-25T16:31:46Z",
+    "reboot_verified": true,
+    "manual_updater_preserved": true,
+    "power_cycle_verified": true
+  },
+  "automatic_reapplication": {
+    "implementation": "tools/startup.py",
+    "hook": "/opt/etc/parseinfo.sh",
+    "boot_service": "AT-HUB.service",
+    "state": "/opt/usr/share/samshush-boot-v1",
+    "selection": "Completed runtime journals only",
+    "installed": true,
+    "reboot_verified": true,
+    "removal_verified_on_device": true,
+    "firmware_update_survival_guaranteed": false,
+    "service_execution_verified": true,
+    "last_verified_utc": "2026-10-25T16:31:46Z",
+    "experimental": false,
+    "art_mode_wake": "Owner confirmed picture, Power/Art Mode switching and soundbar volume after the revision, and normal operation after physical power cycling. Cause of the earlier transient problem remains unproven.",
+    "power_cycle_verified": true,
+    "baseline_startup_service_elapsed_seconds": 129.777346,
+    "baseline_starter_target_active_at_seconds": 10.675863,
+    "runtime_strategy": "Per-group batched snapshots, masks without reload, one reload, batch stop and verified readback",
+    "launch_mode": "Nonblocking systemd-run with separate completion verification",
+    "phase_clock": "Monotonic /proc/uptime",
+    "warm_service_elapsed_seconds": 0.08257,
+    "warm_worker_status_seconds": 1.09,
+    "warm_test_scope": "Existing journals and applied controls; no fresh application or reboot",
+    "cold_boot_service_elapsed_seconds": 3.237255,
+    "cold_boot_service_exit_at_seconds": 8.368424,
+    "cold_boot_worker_started_at_seconds": 13.07,
+    "cold_boot_worker_completed_at_seconds": 107.26,
+    "cold_boot_worker_elapsed_seconds": 94.19,
+    "cold_boot_starter_target_active_at_seconds": 14.129008,
+    "voice_mask_readback_at_seconds": 59.04,
+    "service_group_reloads": 7,
+    "performance_comparison": "One warm check and one physical power-cycle application. Prior wrapper timing was from a different boot; no controlled whole-TV speedup claim."
+  },
+  "service_audit_units": [
+    "com.samsung.tv.AICompanionAgent.service",
+    "com.samsung.tv.ai-interpreter-service.service",
+    "com.samsung.tv.wifi-motion-mgr.service",
+    "com.samsung.tv.wifi-motion-mgr-setcap.service",
+    "user-presence.service",
+    "ua-manager.service",
+    "ambient-ua-agent.service",
+    "data-service.service",
+    "com.samsung.tv.context-aware-service.service",
+    "com.samsung.tv.context-aware-service.path",
+    "awm-service.service",
+    "was-background-update.service",
+    "appbinary-manager.service",
+    "debug-shell.service",
+    "socite-remote.service",
+    "ssc-service.service",
+    "ssdm-service.service",
+    "hdmicec-service.service",
+    "mini-hdmicec-service.service",
+    "remoteapp.service",
+    "sdbd.service"
+  ]
+}

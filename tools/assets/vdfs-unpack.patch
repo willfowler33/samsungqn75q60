@@ -1,0 +1,134 @@
+diff --git a/src/decompress.rs b/src/decompress.rs
+index 66b42b0..7af9d26 100644
+--- a/src/decompress.rs
++++ b/src/decompress.rs
+@@ -149,6 +149,9 @@ pub fn decompress_file(
+             bail!("Could not locate compressed file descriptor");
+         }
+     };
++    if data.len() - descr_offset < std::mem::size_of::<Vdfs4CompFileDescr>() {
++        bail!("Unsupported short descriptor");
++    }
+     let descr: Vdfs4CompFileDescr = unsafe {
+         std::ptr::read_unaligned(data[descr_offset..].as_ptr() as *const Vdfs4CompFileDescr)
+     };
+@@ -160,23 +163,29 @@ pub fn decompress_file(
+     let ctype = detect_compr_type(&descr.magic)
+         .context("unknown compression type in descriptor")?;
+ 
+-    // Samsung-specific "hZip"/"hGzp"/... descriptor: the reference tool
+-    // rejects these (magic[0] must be 'C' or 'I') and their extent table is
+-    // not in the reference layout. Empirically the whole region before the
+-    // descriptor is a single compression stream yielding the full file
+-    // (its decompressed length matches the descriptor's unpacked_size).
+-    if descr.magic[0] == b'h' {
+-        let region = &data[..descr_offset];
+-        return decompress_with(region, ctype)
+-            .with_context(|| format!("hZip single-stream inflate (len={})", region.len()));
+-    }
+-
++    // Authenticated VDFS files store chunk hashes and a signature between
++    // the extent table and descriptor (vdfs4/inode.c init_file_decompression).
+     let comp_extents_count = descr.extents_num as usize;
+     let extent_struct_size = std::mem::size_of::<Vdfs4CompExtent>();
+-
+-    // The compressed chunks live at the front of the blob; the comp_extent
+-    // table is contiguous immediately *before* the descriptor (at the tail).
+-    let table_offset = descr_offset.saturating_sub(comp_extents_count * extent_struct_size);
++    let digest_size = match descr.magic[0] {
++        b'C' => 0,
++        b'I' => 16,
++        b'H' => 20,
++        b'h' => 32,
++        _ => bail!("Unknown authentication prefix"),
++    };
++    let sign_size = match descr.sign_type {
++        0 => 0,
++        1 => 128,
++        2 => 256,
++        _ => bail!("Unknown signature type"),
++    };
++    let auth_size = if digest_size == 0 { 0 } else {
++        (comp_extents_count + 1) * digest_size + sign_size
++    };
++    let table_offset = descr_offset
++        .checked_sub(auth_size + comp_extents_count * extent_struct_size)
++        .context("Extent table underflows file")?;
+ 
+     // Decompress every chunk and concatenate. The reference tool does not
+     // trust unpacked_size for sizing -- it simply writes each chunk's full
+@@ -196,7 +205,8 @@ pub fn decompress_file(
+             continue;
+         }
+         let start = comp_ext.start as usize;
+-        let chunk_end = (start + chunk_len).min(data.len());
++        let chunk_end = start.checked_add(chunk_len).context("Chunk overflow")?;
++        if chunk_end > table_offset { bail!("Chunk outside data area"); }
+ 
+         if comp_ext.flags & VDFS4_CHUNK_FLAG_UNCOMPR != 0 {
+             result.extend_from_slice(&data[start..chunk_end]);
+@@ -208,5 +218,8 @@ pub fn decompress_file(
+         }
+     }
+ 
++    if result.len() as u64 != descr.unpacked_size {
++        bail!("Unpacked size mismatch: got {} expected {}", result.len(), {descr.unpacked_size});
++    }
+     Ok(result)
+ }
+diff --git a/src/unpacker.rs b/src/unpacker.rs
+index 366771c..46b0430 100644
+--- a/src/unpacker.rs
++++ b/src/unpacker.rs
+@@ -1,7 +1,6 @@
+ use anyhow::{Context, Result};
+ use std::collections::{HashMap, HashSet};
+ use std::fs;
+-use std::os::unix::fs::symlink;
+ use std::path::Path;
+ 
+ const S_IFMT: u16 = 0xF000;
+@@ -75,6 +74,9 @@ fn process_directory(
+         let record_type = cattree_key_record_type(&child_rec);
+         let name = cattree_key_name_str(&child_rec).to_string();
+ 
++        if name.is_empty() || name == "." || name == ".." || name.contains('/') || name.contains('\0') {
++            anyhow::bail!("Invalid catalog name: {:?}", name);
++        }
+         match record_type {
+             VDFS4_CATALOG_FOLDER_RECORD => {
+                 let object_id = cattree_key_object_id(&child_rec);
+@@ -185,19 +187,6 @@ fn extract_file(
+     // extents (page symlink). Extract it as an actual symlink so that
+     // e.g. `bin -> usr/bin` is recreated as a link rather than a regular file.
+     if (file_mode & S_IFMT) == S_IFLNK {
+-        if output_path.is_symlink() {
+-            fs::remove_file(output_path)
+-                .with_context(|| format!("remove conflicting symlink: {}", output_path.display()))?;
+-        } else if output_path.exists() {
+-            if output_path.is_dir() {
+-                fs::remove_dir_all(output_path)
+-                    .with_context(|| format!("remove conflicting dir: {}", output_path.display()))?;
+-            } else {
+-                fs::remove_file(output_path)
+-                    .with_context(|| format!("remove conflicting file: {}", output_path.display()))?;
+-            }
+-        }
+-
+         let target = if fork.total_blocks_count == 0 {
+             let inline = fork.inline_data();
+             let len = (file_size as usize).min(inline.len());
+@@ -208,8 +197,11 @@ fn extract_file(
+             String::from_utf8_lossy(&data).to_string()
+         };
+         let target = target.trim_end_matches('\0');
+-        symlink(target, output_path)
+-            .with_context(|| format!("create symlink {} -> {}", output_path.display(), target))?;
++        // Keep firmware links inert so absolute targets cannot escape extraction.
++        let mut name = output_path.file_name().unwrap().to_os_string();
++        name.push(".symlink-target");
++        fs::write(output_path.with_file_name(name), target)
++            .with_context(|| format!("record symlink {}", output_path.display()))?;
+         return Ok(());
+     }
+ 

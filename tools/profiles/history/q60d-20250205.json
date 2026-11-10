@@ -1,0 +1,232 @@
+{
+  "model": "QN75Q60DBFXZA",
+  "build": "T-NKLDAKUC-REL-202502052157",
+  "architecture": "armv7l",
+  "platform": "Tizen 8.0",
+  "owner_uid": 5001,
+  "certificates": [],
+  "units": [
+    "com.samsung.tv.aov-service.path",
+    "com.samsung.tv.aov-service.service",
+    "org.tizen.multi-assistant-service.path",
+    "org.tizen.multi-assistant-service.service",
+    "org.tizen.voice-client.path",
+    "org.tizen.voice-client.service",
+    "org.tizen.voice-app.path",
+    "org.tizen.voice-app.service",
+    "com.samsung.tv.ondevice-voice.path",
+    "com.samsung.tv.ondevice-voice.service",
+    "com.samsung.tv.bixby-prov.path",
+    "com.samsung.tv.bixby-prov.service",
+    "com.samsung.tv.voiceassistant-music.service",
+    "com.samsung.tv.hfpAgent.busname",
+    "hfp-agent.service",
+    "com.samsung.tv.passthru-service.path",
+    "com.samsung.tv.passthru-service.service"
+  ],
+  "voice_privacy": {
+    "application_ids": [
+      "com.samsung.tv.aov-service",
+      "org.tizen.multi-assistant-service",
+      "org.tizen.voice-onboarding",
+      "com.samsung.tv.alexa-client",
+      "com.samsung.tv.alexa-fullscreen-app",
+      "com.samsung.tv.aov-dashboard",
+      "com.samsung.tv.bixby-context-client",
+      "com.samsung.tv.bixby-prov",
+      "com.samsung.tv.bixbycapsuleviewer",
+      "com.samsung.tv.farfieldvoice",
+      "com.samsung.tv.mybixby",
+      "com.samsung.tv.ondevice-voice",
+      "com.samsung.tv.voice-instant-app",
+      "com.samsung.tv.voiceassistant-music",
+      "com.samsung.tv.wakeup-engine-alexa",
+      "com.samsung.tv.wakeup-engine-bixby",
+      "org.tizen.voice-app",
+      "org.tizen.voice-app-service",
+      "org.tizen.voice-client",
+      "org.tizen.stt-client",
+      "com.samsung.tv.passthru-service",
+      "com.samsung.tv.vif",
+      "AQKO41xyKP.AmazonAlexa"
+    ],
+    "systemd_units": [
+      "com.samsung.tv.aov-service.path",
+      "com.samsung.tv.aov-service.service",
+      "org.tizen.multi-assistant-service.path",
+      "org.tizen.multi-assistant-service.service",
+      "org.tizen.voice-client.path",
+      "org.tizen.voice-client.service",
+      "org.tizen.voice-app.path",
+      "org.tizen.voice-app.service",
+      "com.samsung.tv.ondevice-voice.path",
+      "com.samsung.tv.ondevice-voice.service",
+      "com.samsung.tv.bixby-prov.path",
+      "com.samsung.tv.bixby-prov.service",
+      "com.samsung.tv.voiceassistant-music.service",
+      "com.samsung.tv.hfpAgent.busname",
+      "hfp-agent.service",
+      "com.samsung.tv.passthru-service.path",
+      "com.samsung.tv.passthru-service.service"
+    ],
+    "complete_microphone_disable_implemented": false
+  },
+  "optional_controls": {},
+  "app_files": {
+    "org.tizen.voice-onboarding": {
+      "path": "/usr/apps/org.tizen.voice-onboarding/bin/voice-onboarding",
+      "sha256": "954512d68078403b94a55619c642beb45d48fc86336901467a0e11345d20c1e2"
+    },
+    "org.tizen.multi-assistant-service": {
+      "path": "/usr/apps/org.tizen.multi-assistant-service/bin/org.tizen.multi-assistant-service",
+      "sha256": "8ab6367f3e880ae20509af408a82c75bb294eb71a568fe4d882538d6cdb7f90f"
+    },
+    "com.samsung.tv.aov-service": {
+      "path": "/usr/apps/com.samsung.tv.aov-service/bin/aov-service",
+      "sha256": "502248e7c084d6d3d024fb25a971f5eb0ff2b031611043e4147faed901135322"
+    },
+    "com.samsung.tv.passthru-service": {
+      "path": "/opt/usr/apps/com.samsung.tv.passthru-service/bin/passthru-service",
+      "sha256": "505b339a93f2014b8429b38584093559c826bbd3d83a08770532bed2ac6d41ef"
+    },
+    "com.samsung.tv.bixby-context-client": {
+      "path": "/opt/usr/apps/com.samsung.tv.bixby-context-client/bin/bixby-context-client",
+      "sha256": "3cefe9cba420acc9fefd41fbd38107a9b2739654367033f3d4fc7bed7519926a"
+    },
+    "com.samsung.tv.voice-instant-app": {
+      "path": "/opt/usr/apps/com.samsung.tv.voice-instant-app/bin/com.samsung.tv.voice-instant-app.dll",
+      "sha256": "b5c4f65448c706c30c296cfdfddc93134a4717f76f0064d887f12c0cb217a489"
+    },
+    "com.samsung.tv.ondevice-voice": {
+      "path": "/opt/usr/apps/com.samsung.tv.ondevice-voice/bin/ondevice-voice",
+      "sha256": "a8e3125dfe29bf079524ed293681c3fe50a340cfaf22d59e4eb431f5dd1780c3"
+    },
+    "com.samsung.tv.bixby-prov": {
+      "path": "/opt/usr/apps/com.samsung.tv.bixby-prov/bin/bixby-prov",
+      "sha256": "362985a3f1eb6bf6b096fed7c8edc8018db8a9daa068aca8ef480e196710fa49"
+    },
+    "com.samsung.tv.ambient-sound": {
+      "path": "/opt/usr/apps/com.samsung.tv.ambient-sound/bin/ambient-sound",
+      "sha256": "5ab8b1e2f2d7243817be8d11e6ca2eb1c10ac363ea1d142266e8d59b4f3556ba"
+    },
+    "com.samsung.tv.aov-dashboard": {
+      "path": "/opt/usr/apps/com.samsung.tv.aov-dashboard/bin/aov-dashboard.dll",
+      "sha256": "51abb0c1eb27510f5713c0e16a0134cda5ef882173a40ac62a5e2ae67ba60ee8"
+    },
+    "AQKO41xyKP.AmazonAlexa": {
+      "path": "/opt/usr/apps/AQKO41xyKP/bin/AQKO41xyKP.AmazonAlexa",
+      "sha256": "f4e3a97bc1ced293a4177b09e48ffbe611912ee5523c10c2692700fc086e4537"
+    },
+    "com.samsung.tv.mybixby": {
+      "path": "/opt/usr/apps/com.samsung.tv.mybixby/bin/com.samsung.tv.mybixby.dll",
+      "sha256": "3c682de6e87aeed6a8ff21b40833023710805a42a168edb068b39db6d288b529"
+    },
+    "com.samsung.tv.voiceassistant-music": {
+      "path": "/opt/usr/apps/com.samsung.tv.voiceassistant-music/bin/VoiceAssistantMusic.dll",
+      "sha256": "205b5ddda1f9c49c223bf270899bbd16ccfae09dedd2b784f5217fb2b74504f0"
+    },
+    "org.tizen.voice-app": {
+      "path": "/opt/usr/apps/org.tizen.voice-app/bin/voice-app",
+      "sha256": "ff27f4961c03f304e863968ec4c464d26c68b4c7d30770de400d5d16ce418a2e"
+    },
+    "org.tizen.voice-app-service": {
+      "path": "/opt/usr/apps/org.tizen.voice-app/bin/voice-app",
+      "sha256": "ff27f4961c03f304e863968ec4c464d26c68b4c7d30770de400d5d16ce418a2e"
+    },
+    "org.tizen.voice-client": {
+      "path": "/opt/usr/apps/org.tizen.voice-client/bin/voice-client",
+      "sha256": "33e0cbab0eb4a4d48afcadddefaee5c7d891ac5b1400173b42234d7686d971a7"
+    },
+    "org.tizen.stt-client": {
+      "path": "/opt/usr/apps/org.tizen.voice-client/bin/stt-client",
+      "sha256": "eace517b15300113697d5ed01961e43807673b6d35ad874022ed29b159096172"
+    },
+    "com.samsung.tv.bixbycapsuleviewer": {
+      "path": "/opt/usr/apps/com.samsung.tv.bixbycapsuleviewer/bin/bixbycapsuleviewer",
+      "sha256": "754605b55040340eda520531ba653170e6b4ad990b45c4f651c829136bfa0e13"
+    },
+    "com.samsung.tv.farfieldvoice": {
+      "path": "/opt/usr/apps/com.samsung.tv.farfieldvoice/bin/ffv-service",
+      "sha256": "cd28fb54e8d631de2955d52e2c9fb22514f8d7fc4ab401296f41b01f5198bd90"
+    },
+    "com.samsung.tv.alexa-fullscreen-app": {
+      "path": "/opt/usr/apps/com.samsung.tv.alexa-client/bin/alexa-fullscreen-app",
+      "sha256": "83fc2291a752ec9aaee86a35981d5db23cf5f903551c44cf97609d82e7f147a9"
+    },
+    "com.samsung.tv.alexa-client": {
+      "path": "/opt/usr/apps/com.samsung.tv.alexa-client/bin/alexa-client",
+      "sha256": "d0f53c03c455e96ee7b87e1ed6511adca1c8cc68eb25b6f4b09968d9005fe63d"
+    },
+    "com.samsung.tv.wakeup-engine-bixby": {
+      "path": "/opt/usr/apps/com.samsung.tv.wakeup-engine-bixby/bin/wakeup-engine-bixby",
+      "sha256": "94fa4b6d2ef8e8f5bafce4155178b88e9bde2c620691fc530a7d3e673cfcff3f"
+    },
+    "com.samsung.tv.wakeup-engine-alexa": {
+      "path": "/opt/usr/apps/com.samsung.tv.wakeup-engine-alexa/bin/wakeup-engine-alexa",
+      "sha256": "f1697b842dff2a07305c482f9c14099de2432915f1c3be3766cf17a3b1c89866"
+    },
+    "com.samsung.tv.vif": {
+      "path": "/opt/usr/apps/com.samsung.tv.vif/bin/voice-interaction-framework",
+      "sha256": "710d9e36e6314361a1360c2d3fd5b4df2fc98b19e55c84c239c503a0fe56e6bf"
+    }
+  },
+  "unit_sha256": {
+    "com.samsung.tv.aov-service.path": "b2dbf1ba191fd25f7efbc547c88de6779516b8802d24b09642c9ca148dfcab54",
+    "com.samsung.tv.aov-service.service": "0d5e9e9f886d434d41823d00ad507e0be680e0bbffe4de2b11586b026fbf0fb6",
+    "org.tizen.multi-assistant-service.path": "fda6ffc3fc7f201f3ca224c786951e5ef867d114d7a191ce4ae96985df420d3f",
+    "org.tizen.multi-assistant-service.service": "17306ecb5e2ea72b014f7625d08831e2cb7548f4ada0d824b0cb842d8c775c27",
+    "org.tizen.voice-client.path": "948efd6dbbe0c4bd789b1005595efea45eb7ee56bbfc611e59c163f45e0058fa",
+    "org.tizen.voice-client.service": "7ee1d0a884905bca2066b24519814236a6a3f38bd71307d8f7b894bc2c10b766",
+    "org.tizen.voice-app.path": "5d8c7a3188c80779ce34d62d8a0d8c3ff5b28e04e9f4642777b9c2f9aee13edb",
+    "org.tizen.voice-app.service": "e0296f8b4c2b4bb92f04b6bc2383ab1aaa1c7a7e323f0a51a29dd1b53cd38753",
+    "com.samsung.tv.ondevice-voice.path": "6b3fde2d9993cb5bacc3414f66f69c36262d105ca3659c62e613b322a7a7977e",
+    "com.samsung.tv.ondevice-voice.service": "cee563fbbde25e59c2b734e841394cf72cb99bbd789a6081445ca9fc6dc584da",
+    "com.samsung.tv.bixby-prov.path": "656ef924a6a4ecb8546349ecc44c3b178c4f30b9eb52939c9d71cd05d9e3ebfd",
+    "com.samsung.tv.bixby-prov.service": "afee1bde19e788ab76050c294f1ed5b949dd10766b4995772ba5741946a96ba3",
+    "com.samsung.tv.voiceassistant-music.service": "1e7eebdc815885cf88343938edf31b847cabb6abbb42a71ad2e55fcf6b0afc47",
+    "com.samsung.tv.hfpAgent.busname": "117c0f2dd82d9cbd948221bac669a1a49d80312f9d6efa5266edc626be590e48",
+    "hfp-agent.service": "93fd6097e279c421a129f4a0ed68252a5f5cad6d8cb05648d92ed06a1537a1e0",
+    "com.samsung.tv.passthru-service.path": "e33b43c96943b029ecd2cd0e3dc4757f0f0a292494f7472fad2b613d357b2650",
+    "com.samsung.tv.passthru-service.service": "178e5b588d2cc110edf0e0c8679a8e055ae22e85ff0f6f4243f957f933f04af2"
+  },
+  "startup_guards": [
+    "org.tizen.voice-client.service",
+    "org.tizen.voice-app.service",
+    "com.samsung.tv.ondevice-voice.service",
+    "com.samsung.tv.bixby-prov.service",
+    "com.samsung.tv.passthru-service.service"
+  ],
+  "validation": {
+    "temporary_root": "Authenticated UID/GID 0; account/key files unchanged; staging cleaned.",
+    "native_probe": "org.tizen.voice-onboarding disable, launch denial, enable and original stopped state restored.",
+    "dependencies": "Live native registrations, executable hashes, unit contents and systemd dependencies reviewed. No unrelated Requires/BindsTo consumers observed.",
+    "batch_applied": true,
+    "reboot_verified": false,
+    "runtime_probe": "com.samsung.tv.aov-service.path runtime mask, status and exact active-state restoration passed; probe journal removed.",
+    "batch_readback": "23 native voice app flags and launch denials, separate ambient-sound flag and launch denial, five startup markers, and 17 current-boot unit masks passed live checks. Full batch restore and retained-feature/reboot checks remain unverified.",
+    "last_verified_utc": "2026-11-10T01:29:59.236769+00:00"
+  },
+  "limits": [
+    "Only this exact model, architecture and build.",
+    "Native flags and guards have not been reboot-tested on this TV. Runtime masks last for the current boot.",
+    "Boot reapplication is a separately authorized, reversible startup hook. It does not establish hardware, DSP, standby, browser or external microphone denial.",
+    "Voice commands and microphone-based automatic sensing are unavailable when controlled."
+  ],
+  "startup": {
+    "original_sha256": "c6369e7dec69408e176daa252d436acf6f8e265f560504d8bd831c8023c71d61",
+    "unit_sha256": "b6829f0f7e95464178f92922e5fdca83bf0874df2e1bbb77d68db6892a5490b3",
+    "original_metadata": "0:0:777",
+    "original_smack_access": "_",
+    "gawk_sha256": "907559a6f55072fd8bba2e157f16c202fb4e4d28c328e15f51341be657b933c6",
+    "bash_sha256": "e15f1a81cfc2a831accbef3ce5e481a73ffeedb69cab45c0fe7ac58d861fe2e1",
+    "assessment": "Live startup script and AT-HUB hashes match shared startup policy. Root system-service gawk probe passed with System::Privileged label; temporary unit/files cleaned.",
+    "installed": true,
+    "run_tested": true,
+    "reboot_verified": false,
+    "removal_verified": true,
+    "reinstalled_and_run_tested": true,
+    "last_verified_utc": "2026-11-10T01:52:07.576529+00:00"
+  },
+  "historical": true,
+  "superseded_by_build": "T-NKLDAKUC-REL-202601050820"
+}

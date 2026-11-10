@@ -1,0 +1,649 @@
+#!/usr/bin/env python3
+"""Inspect and control the verified Frame Pro build through temporary root."""
+
+import argparse
+import asyncio
+import base64
+import datetime
+import hashlib
+import ipaddress
+import json
+import os
+import re
+import secrets
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path, PurePosixPath
+
+import device_scripts
+import home
+import startup
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+ASSETS = HERE / "assets"
+# Keep the pinned transport isolated from globally installed packages.
+sys.path.insert(0, str(HERE / "vendor"))
+
+
+def policy():
+    return json.loads((HERE / "profile.json").read_text())
+
+
+def verify_files():
+    manifest = ASSETS / "SHA256SUMS.json"
+    if not manifest.exists():
+        raise ValueError(
+            "Device asset manifest is missing: tools/assets/SHA256SUMS.json"
+        )
+    for name, expected in json.loads(manifest.read_text()).items():
+        path = ASSETS / name
+        if path.is_symlink() or not path.resolve().is_relative_to(ASSETS):
+            raise ValueError(f"Unsafe package path: {name}")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"Package file changed: {name}")
+
+
+def wrapped(script):
+    # No script metacharacters pass through the transport command parser.
+    encoded = base64.b64encode(script.encode()).decode()
+    return f"printf %s {encoded} | base64 -d | /bin/bash"
+
+
+def render(
+    action,
+    scope,
+    *,
+    certificate_journal=False,
+    unit_group=None,
+    profile=None,
+    runtime_state=None,
+):
+    p = policy() if profile is None else profile
+    certs = "\n".join(
+        "\t".join((c["path"], c["before"], c["after"], c["file"]))
+        for c in p["certificates"]
+    )
+    selected_units = (
+        p["voice_privacy"]["systemd_units"] if scope == "voice" else p["units"]
+    )
+    if unit_group is not None:
+        selected_units = p["optional_controls"][unit_group]["systemd_units"]
+        if not selected_units:
+            raise ValueError("No assessed units in this group")
+    units = "\n".join(selected_units)
+    processes = (
+        p["optional_controls"][unit_group].get("process_paths", [])
+        if unit_group is not None
+        else []
+    )
+    script = device_scripts.RUNTIME
+    if runtime_state is not None:
+        script = script.replace("STATE=/run/frame-runtime-v1", f"STATE={runtime_state}")
+    if unit_group is not None:
+        grace = p["optional_controls"][unit_group].get("stop_grace_seconds", 0)
+        if type(grace) is not int or not 0 <= grace <= 30:
+            raise ValueError("Invalid service stop grace period")
+        script = script.replace("STOP_GRACE_SECONDS=0", f"STOP_GRACE_SECONDS={grace}")
+    if certificate_journal:
+        script = script.replace(
+            "STATE=/run/frame-runtime-v1", "STATE=/run/frame-certificates-v1"
+        )
+    if unit_group is not None:
+        script = script.replace(
+            "STATE=/run/frame-runtime-v1", f"STATE=/run/frame-services-{unit_group}-v1"
+        )
+    for key, value in {
+        "ACTION": action,
+        "SCOPE": scope,
+        "BUILD": p["build"],
+        "ARCH": p.get("architecture", "aarch64"),
+        "CERTS": certs,
+        "UNITS": units,
+        "PROCESSES": "\n".join(processes),
+    }.items():
+        script = script.replace(f"@@{key}@@", value)
+    if "@@" in script:
+        raise ValueError("Unresolved script placeholder")
+    if action == "inspect":
+        return script
+    encoded = base64.b64encode(script.encode()).decode()
+    return f"printf %s {encoded} | base64 -d | nsenter --mount=/proc/1/ns/mnt /bin/bash"
+
+
+def render_service_audit():
+    p = policy()
+    units = sorted(
+        set(p.get("service_audit_units", []))
+        | {
+            unit
+            for entry in p["optional_controls"].values()
+            for unit in entry["systemd_units"]
+        }
+    )
+    script = device_scripts.SERVICE_AUDIT.replace("@@BUILD@@", p["build"])
+    return script.replace("@@UNITS@@", " ".join(shlex.quote(unit) for unit in units))
+
+
+def render_apps(action, *, sound_sensor=False, group=None, profile=None):
+    """Preserve the deployed native-app journal and exact owner context."""
+    if action not in ("apply", "status", "restore", "verify"):
+        raise ValueError("Unknown app action")
+    p = policy() if profile is None else profile
+    prefix = device_scripts.APP_PREFIX
+    for token, name in (
+        ("OWNER_DLL", "OwnerExec.dll"),
+        ("OWNER_CONFIG", "OwnerExec.runtimeconfig.json"),
+    ):
+        encoded = base64.b64encode((ASSETS / "payloads" / name).read_bytes()).decode()
+        prefix = prefix.replace("@@" + token + "@@", encoded)
+    script = device_scripts.APP_CONTROL.replace(
+        "@@MODE@@", "status" if action == "verify" else action
+    ).replace("@@BUILD@@", p["build"])
+    application_ids = (
+        ["com.samsung.tv.ambient-sound"]
+        if sound_sensor
+        else p["voice_privacy"]["application_ids"]
+    )
+    if group is not None:
+        if sound_sensor:
+            raise ValueError("Sound sensor cannot share an optional-app group")
+        application_ids = p["optional_controls"][group]["application_ids"]
+        if not application_ids:
+            raise ValueError("No assessed apps in this group")
+    script = script.replace("@@APPS@@", "\n".join(application_ids))
+    if action == "verify":
+        start = script.index("if [[ $MODE == status")
+        end = script.index('mkdir -m 700 "$LOCK"')
+        script = script[:start] + device_scripts.APP_VERIFY + script[end:]
+    if "@@" in prefix + script:
+        raise ValueError("Unresolved app payload placeholder")
+    boot = device_scripts.APP_BOOT_READBACK if action == "verify" else ""
+    result = prefix + boot + script + "OWNER\n"
+    if sound_sensor:
+        result = result.replace("frame-voice-apps-v2", "frame-sound-sensor-v1")
+    if group is not None:
+        result = result.replace("frame-voice-apps-v2", f"frame-apps-{group}-v1")
+    result = result.replace("25 persistent", f"{len(application_ids)} persistent")
+    return result
+
+
+def check_result(result):
+    if not result.get("authenticated") or any(
+        result.get(k) != 0 for k in ("uid", "euid", "gid", "egid")
+    ):
+        raise ValueError("Authenticated UID/GID 0 was not established")
+    if not result.get("system_files_unchanged") or not result.get("staging_cleaned"):
+        raise ValueError("Upstream root cleanup or system-file verification failed")
+    if not result.get("commands"):
+        raise ValueError("No TV command result was returned")
+    for command in result["commands"]:
+        if command.get("timed_out") or command.get("exit_code") != 0:
+            raise ValueError(
+                "TV command failed; inspect the saved report and run restore if apply started"
+            )
+
+
+def minute_of_day(value):
+    if not re.fullmatch(r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", value):
+        raise argparse.ArgumentTypeError("Use a local time in 24-hour HH:MM format")
+    hour, minute = value.split(":")
+    return int(hour) * 60 + int(minute)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--device-profile",
+        choices=("frame", "q60d"),
+        default="frame",
+        help="Exact-build policy; q60d permits voice controls only",
+    )
+    parser.add_argument(
+        "--tv",
+        type=ipaddress.IPv4Address,
+        help="Explicit TV IPv4 address; no discovery",
+    )
+    parser.add_argument("--sdb", type=Path, help="Samsung SDK sdb executable")
+    parser.add_argument(
+        "--callback-host",
+        type=ipaddress.IPv4Address,
+        help="This computer’s LAN IPv4 address",
+    )
+    parser.add_argument("--logs", type=Path, default=ROOT / ".local/reports")
+    sub = parser.add_subparsers(dest="action", required=True)
+    sub.add_parser(
+        "doctor", help="Local dependency and package checks; no TV connection"
+    )
+    sub.add_parser("plan", help="Show scope and limits; no TV connection")
+    sub.add_parser(
+        "inspect",
+        help="Acquire temporary root; report identity, namespace and target state",
+    )
+    sub.add_parser(
+        "voice-audit",
+        help="Acquire temporary root; inspect voice processes and capture metadata without recording audio",
+    )
+    sub.add_parser(
+        "debloat-audit", help="Read optional-app, telemetry and detector dependencies"
+    )
+    sub.add_parser(
+        "service-audit",
+        help="Read service inventory, activation dependencies, app registrations and process identities",
+    )
+    boot = sub.add_parser(
+        "startup", help="Reapply currently selected runtime controls after boot"
+    )
+    boot.add_argument(
+        "operation", choices=("audit", "probe", "install", "status", "run", "remove")
+    )
+    packages = sub.add_parser(
+        "packages",
+        help="Back up and natively remove the six assessed optional packages",
+    )
+    packages.add_argument(
+        "operation",
+        choices=("prepare", "prepare-returned", "backup", "remove", "status"),
+    )
+    packages.add_argument(
+        "--backup-dir",
+        type=Path,
+        help="New private directory for preparation; original attempt directory for backup/remove",
+    )
+    sub.add_parser("hdmi-audit", help="Read HDMI-CEC settings and connected devices")
+    sub.add_parser(
+        "privacy-audit",
+        help="Inspect SmartThings sound sensing, Wi-Fi presence and ACR metadata",
+    )
+    sub.add_parser(
+        "status", help="Acquire temporary root; check recorded overlays and masks"
+    )
+    apply = sub.add_parser(
+        "apply", help="Apply reversible changes for the current boot"
+    )
+    apply.add_argument(
+        "--scope", choices=("certificates", "services", "both", "voice"), required=True
+    )
+    sub.add_parser(
+        "restore", help="Remove our overlays/masks and restart previously active units"
+    )
+    certificates = sub.add_parser(
+        "certificates",
+        help="Separate per-boot certificate overlays; preserve voice controls",
+    )
+    certificates.add_argument("operation", choices=("apply", "status", "restore"))
+    apps = sub.add_parser(
+        "apps",
+        help="Persistent native app flags; restore also removes recorded startup guards",
+    )
+    apps.add_argument("operation", choices=("apply", "status", "verify", "restore"))
+    apps.add_argument(
+        "--group",
+        choices=["voice-ui-refresh"]
+        + [k for k, v in policy()["optional_controls"].items() if v["application_ids"]],
+        help="Optional app group with its own recovery journal; default is voice",
+    )
+    services = sub.add_parser(
+        "services", help="Assessed optional-service groups with separate recovery"
+    )
+    services.add_argument(
+        "group",
+        choices=[
+            k for k, v in policy()["optional_controls"].items() if v["systemd_units"]
+        ],
+    )
+    services.add_argument("operation", choices=("apply", "status", "restore"))
+    updater = sub.add_parser(
+        "auto-update", help="Read, disable or restore native automatic firmware updates"
+    )
+    updater.add_argument("operation", choices=("status", "disable", "restore"))
+    home_control = sub.add_parser(
+        "home", help="Optional native Home startup preferences or Apple TV shortcut row"
+    )
+    home_control.add_argument(
+        "operation", choices=("inspect", "install", "status", "remove")
+    )
+    home_scope = home_control.add_mutually_exclusive_group()
+    home_scope.add_argument(
+        "--startup-only",
+        action="store_true",
+        help="Install startup preferences only; arrange source shortcuts in the TV menus",
+    )
+    home_scope.add_argument(
+        "--apple-tv-only",
+        action="store_true",
+        help="Inspect, install, check or restore the Apple TV-only shortcut row",
+    )
+    launchpad = sub.add_parser(
+        "launchpad",
+        help="Optional fullscreen shortcut app and reversible Home assignment",
+    )
+    launchpad.add_argument(
+        "operation",
+        choices=(
+            "inspect",
+            "install",
+            "update",
+            "launch",
+            "activate",
+            "status",
+            "restore",
+        ),
+    )
+    launchpad.add_argument(
+        "--widget",
+        type=Path,
+        help="Signed Shortcuts.wgt; required for install, update and activate",
+    )
+    launchpad.add_argument(
+        "--previous-widget",
+        type=Path,
+        help="Previously installed signed widget; required only for update",
+    )
+    quiet = sub.add_parser(
+        "quiet-hours", help="Put full-screen Art in standby during a daily window"
+    )
+    quiet.add_argument("operation", choices=("inspect", "set", "status", "remove"))
+    quiet.add_argument(
+        "--spotlight-art",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="When the Spotlight screensaver appears, open full-screen Art at any hour "
+        "(set only; off on a new installation, otherwise retain the saved choice)",
+    )
+    quiet.add_argument(
+        "--start",
+        type=minute_of_day,
+        metavar="HH:MM",
+        help="Start of quiet hours, local 24-hour time (inclusive)",
+    )
+    quiet.add_argument(
+        "--end",
+        type=minute_of_day,
+        metavar="HH:MM",
+        help="End of quiet hours, local 24-hour time (exclusive)",
+    )
+    sensor = sub.add_parser(
+        "sound-sensor",
+        help="Separately block or restore the ambient-sound capture app",
+    )
+    sensor.add_argument("operation", choices=("apply", "status", "verify", "restore"))
+    sub.add_parser(
+        "guards-apply",
+        help="Install eight vendor startup guards after a completed app apply",
+    )
+    args = parser.parse_args()
+    if (
+        args.device_profile == "frame"
+        and args.action == "apps"
+        and args.group == "voice-ui-refresh"
+    ):
+        parser.error("voice-ui-refresh is an assessed Q60D-only group")
+    if args.action == "quiet-hours":
+        if args.operation == "set":
+            if args.start is None or args.end is None or args.start == args.end:
+                parser.error(
+                    "quiet-hours set requires distinct --start and --end times"
+                )
+        elif args.spotlight_art is not None:
+            parser.error(
+                "--spotlight-art and --no-spotlight-art are only valid with quiet-hours set"
+            )
+        elif args.start is not None or args.end is not None:
+            parser.error("--start and --end are only valid with quiet-hours set")
+    if args.action == "launchpad":
+        needs_widget = args.operation in ("install", "update", "activate")
+        if needs_widget != (args.widget is not None):
+            parser.error(
+                "--widget is required only for launchpad install, update and activate"
+            )
+        if (args.operation == "update") != (args.previous_widget is not None):
+            parser.error("--previous-widget is required only for launchpad update")
+    if args.action == "home":
+        if args.operation == "install" and not (
+            args.startup_only or args.apple_tv_only
+        ):
+            parser.error(
+                "Choose home install --startup-only for startup preferences, or "
+                "home install --apple-tv-only for the native shortcut row."
+            )
+        if args.operation != "install" and args.startup_only:
+            parser.error("--startup-only is only valid with home install")
+    if args.action == "plan":
+        if args.device_profile == "q60d":
+            import q60d
+
+            selected_policy = q60d.policy()
+        else:
+            selected_policy = policy()
+        print(json.dumps(selected_policy, indent=2))
+        return 0
+    verify_files()
+    from samsung_tv_root.archive_root import probe
+    from samsung_tv_root.sdb import SdbClient, find_sdb
+
+    local_sdb = ROOT / ".local/toolchain/sdb-4.2.36/data/tools/sdb"
+    if args.sdb:
+        os.environ["SDB"] = str(args.sdb.expanduser().resolve())
+    elif not os.environ.get("SDB") and local_sdb.is_file():
+        os.environ["SDB"] = str(local_sdb)
+    payloads = ASSETS / "payloads"
+    if args.action == "doctor":
+        print("Package checksums: OK")
+        print("Python:", sys.version.split()[0])
+        print("OpenSSL:", shutil.which("openssl") or "MISSING")
+        try:
+            executable = find_sdb()
+            result = subprocess.run(
+                [str(executable), "version"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=True,
+            )
+            print("SDB:", executable)
+            print(result.stdout.strip())
+        except (RuntimeError, OSError, subprocess.SubprocessError) as error:
+            print(error)
+            return 1
+        return 0 if shutil.which("openssl") else 1
+    if args.tv is None:
+        parser.error("--tv is required for TV operations")
+    if not shutil.which("openssl"):
+        raise ValueError("OpenSSL is required")
+    if args.device_profile == "q60d":
+        import q60d
+
+        return q60d.run(args, sys.modules[__name__])
+    if args.action == "home" and args.apple_tv_only:
+        import home_layout
+
+        return home_layout.run(args, sys.modules[__name__])
+    if args.action == "launchpad":
+        import launchpad
+
+        return launchpad.run(args, sys.modules[__name__])
+    if args.action == "packages":
+        import remove_packages
+
+        return remove_packages.run(args, sys.modules[__name__])
+    client = SdbClient(find_sdb(), str(args.tv))
+    args.logs.mkdir(parents=True, exist_ok=True, mode=0o700)
+    report = args.logs / (
+        datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%SZ")
+        + "-"
+        + args.action
+        + "-"
+        + secrets.token_hex(3)
+        + ".json"
+    )
+    stage = PurePosixPath("/home/owner/share/tmp/sdk_tools") / (
+        "frame-runtime-" + secrets.token_hex(8)
+    )
+    staged = False
+    evidence = {
+        "action": args.action,
+        "operation": getattr(args, "operation", None),
+        "group": getattr(args, "group", None),
+        "tv": str(args.tv),
+        "completed": False,
+    }
+    try:
+        if args.action == "quiet-hours":
+            import home_layout
+            import quiet_hours_script
+
+            if policy()["model"] != home.MODEL or policy()["build"] != home.BUILD:
+                raise ValueError(
+                    "Art quiet hours require the verified Frame Pro model and build"
+                )
+            home_layout.verify_model(args.tv)
+            script = quiet_hours_script.render(
+                args.operation,
+                start=args.start,
+                end=args.end,
+                spotlight_art=args.spotlight_art,
+                assets={
+                    name: (payloads / name).read_bytes()
+                    for name in (
+                        "ArtQuietHours.dll",
+                        "ArtQuietHours.runtimeconfig.json",
+                    )
+                },
+            )
+            # Run alongside the native screen and power services in PID 1's mount namespace.
+            command = home_layout.device_command(script)
+        elif args.action == "startup" and args.operation in ("audit", "probe"):
+            template = (
+                device_scripts.STARTUP_AUDIT
+                if args.operation == "audit"
+                else device_scripts.STARTUP_PROBE
+            )
+            script = template.replace("@@BUILD@@", policy()["build"])
+        elif args.action == "startup":
+            package = (
+                startup.bundle(policy(), render, ASSETS)
+                if args.operation == "install"
+                else b""
+            )
+            script = startup.control(
+                args.operation, policy()["build"], hashlib.sha256(package).hexdigest()
+            )
+            if args.operation == "install":
+                client.connect()
+                client.require_device()
+                result = client.capture(f"mkdir {stage}")
+                if "\n[exit:0]" not in result.output:
+                    raise ValueError("Cannot create TV staging directory")
+                staged = True
+                with tempfile.TemporaryDirectory(
+                    prefix="samshush-startup-"
+                ) as directory:
+                    path = Path(directory) / "startup.tar.gz"
+                    path.write_bytes(package)
+                    client.push(path, stage / path.name)
+        elif args.action == "voice-audit":
+            script = device_scripts.VOICE_AUDIT
+        elif args.action == "service-audit":
+            script = render_service_audit()
+        elif args.action == "debloat-audit":
+            script = device_scripts.DEBLOAT_AUDIT.replace(
+                "@@BUILD@@", policy()["build"]
+            )
+        elif args.action == "hdmi-audit":
+            script = device_scripts.HDMI_AUDIT.replace("@@BUILD@@", policy()["build"])
+        elif args.action == "privacy-audit":
+            script = device_scripts.PRIVACY_AUDIT.replace(
+                "@@BUILD@@", policy()["build"]
+            )
+        elif args.action == "auto-update":
+            script = device_scripts.AUTO_UPDATE.replace(
+                "@@BUILD@@", policy()["build"]
+            ).replace("@@MODE@@", args.operation)
+        elif args.action == "home":
+            script = home.render(args.operation, policy())
+        elif args.action == "services":
+            script = render(args.operation, "services", unit_group=args.group)
+        elif args.action == "certificates":
+            script = render(args.operation, "certificates", certificate_journal=True)
+        elif args.action in ("apps", "sound-sensor"):
+            script = render_apps(
+                args.operation,
+                sound_sensor=args.action == "sound-sensor",
+                group=getattr(args, "group", None),
+            )
+        elif args.action == "guards-apply":
+            script = device_scripts.STARTUP_GUARDS
+        else:
+            script = render(args.action, getattr(args, "scope", "none"))
+        if (args.action == "apply" and args.scope in ("certificates", "both")) or (
+            args.action == "certificates" and args.operation == "apply"
+        ):
+            client.connect()
+            client.require_device()
+            # Staging contains public replacement CA bundles only, never private keys.
+            result = client.capture(f"mkdir {stage}")
+            if "\n[exit:0]" not in result.output:
+                raise ValueError("Cannot create TV staging directory")
+            staged = True
+            for cert in policy()["certificates"]:
+                client.push(
+                    ASSETS / "certificates" / cert["file"], stage / cert["file"]
+                )
+        # The stage path is generated here and consists solely of fixed path text and hex.
+        if args.action != "quiet-hours":
+            script = f"export FRAME_STAGE={shlex.quote(str(stage))}\n" + script
+            command = wrapped(script)
+        print(
+            "Acquiring temporary root. Even inspect/status execute the root exploit.",
+            flush=True,
+        )
+        result = asyncio.run(
+            probe(
+                str(args.tv),
+                callback_host=str(args.callback_host) if args.callback_host else None,
+                # The launcher return channel otherwise expires after 50 seconds,
+                # even while an authorized command is still within its budget.
+                accept_timeout=180,
+                command_timeout=180,
+                commands=(command,),
+                payloads=payloads,
+            )
+        )
+        evidence["result"] = result
+        for command in result.get("commands", []):
+            print(command.get("stdout", ""), end="")
+            print(command.get("stderr", ""), end="", file=sys.stderr)
+        check_result(result)
+        evidence["completed"] = True
+    except Exception as error:
+        evidence["error"] = str(error)
+        print(f"FAILED: {error}", file=sys.stderr)
+    finally:
+        if staged:
+            try:
+                result = client.capture(f"rm -rf {stage}; test ! -e {stage}")
+                evidence["bundle_staging_cleaned"] = "\n[exit:0]" in result.output
+            except Exception as error:
+                evidence["bundle_staging_cleaned"] = False
+                evidence["cleanup_error"] = str(error)
+            if not evidence.get("bundle_staging_cleaned"):
+                evidence["completed"] = False
+                print(f"Bundle staging cleanup incomplete: {stage}", file=sys.stderr)
+        with report.open("x") as output:
+            os.chmod(report, 0o600)
+            json.dump(evidence, output, indent=2)
+            output.write("\n")
+        print(f"Report: {report}", file=sys.stderr)
+    return 0 if evidence["completed"] else 1
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError) as error:
+        print(f"FAILED: {error}", file=sys.stderr)
+        raise SystemExit(1) from error
